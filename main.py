@@ -25,3 +25,5 @@ bias = 0.0
 output = neuron_forward(inputs, weights, bias)
 
 print(f"Neuron output: {output}")
+
+# hello
