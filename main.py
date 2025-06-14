@@ -4,24 +4,27 @@ import numpy as np
 def relu(x):
     return np.maximum(0, x)
 
-# Single neuron forward pass
-def neuron_forward(input, weights, bias):
+# Each row in weights = one neuron
+def layer_forward(input, weights, biases):
     # Weighted sum + bias
-    z = np.dot(weights, input) + bias
+    z = np.dot(weights, input) + biases
     # Activation
     return relu(z)
 
-# Example: Vertical edge detector neuron
-# Input: 4 pixels (2x2 image patch flattened)
+# Inputs (e.g. 4 pixels from image patch)
 inputs = np.array([0.1, 0.9, 0.1, 0.9])
 
-# Weights = Vertical edge detector
-weights = np.array([-1, +1, -1, +1])
+# Layer with 3 neurons → 3 filters (e.g. vertical, horizontal, diagonal)
+weights = np.array([
+    [-1, 1, -1, 1],         # Neuron 1: vertical edge detector
+    [1, 1, -1, -1],         # Neuron 2: horizontal edge
+    [0.5, -0.5, 0.5, -0.5]  # Neuron 3: diagonal
+])
 
-# Bias
-bias = 0.0
+# Biases
+biases = np.array([0, 0, 0])
 
 # Forward pass
-output = neuron_forward(inputs, weights, bias)
+outputs = layer_forward(inputs, weights, biases)
 
-print(f"Neuron output: {output}")
+print(f"Neuron output: {outputs}")
