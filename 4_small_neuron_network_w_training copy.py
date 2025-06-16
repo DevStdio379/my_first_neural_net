@@ -32,9 +32,9 @@ weights = np.random.randn(input_size)
 bias = 0.0
 
 # training
+print(f"initial_weights: {weights} | bias: {bias}")
 
 # Learning rate
-
 lr = 0.1
 
 # Training loop
@@ -50,12 +50,12 @@ for epoch in range(1000):
         loss = binary_cross_entropy(pred, y)
         total_loss += loss
 
-        # Backward pass (manual gradient)
-        dL_dpred = -(y / (pred + 1e-8)) + ((1 - y) / (1 - pred + 1e-8))
-        dpred_dz = pred * (1 - pred) # derivative of sigmoid
-        dz_dw = x
+        # Backward pass (manual gradient) | chain rule # dLoss / dWeights
+        dL_dpred = -(y / (pred + 1e-8)) + ((1 - y) / (1 - pred + 1e-8)) # dLoss / dPrediction
+        dpred_dz = pred * (1 - pred) # derivative of sigmoid # dPrediction / dz
+        dz_dw = x # dz / dWeights
 
-        grad = dL_dpred * dpred_dz
+        grad = dL_dpred * dpred_dz # apply chain rule dLoss / dz = (dLoss / dPrediction) * (dPrediction / dz)
 
         # Update weights and bias
         weights -= lr * grad * dz_dw
