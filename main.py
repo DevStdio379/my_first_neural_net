@@ -1,51 +1,76 @@
 import numpy as np
 
-# ReLU activation function
+# ReLU activation function for hidden layer
 def relu(x):
     return np.maximum(0, x)
 
-# Each row in weights = one neuron
-def layer_forward(input, weights, biases):
-    # Weighted sum + bias
-    z = np.dot(weights, input) + biases
-    # Activation
-    return relu(z)
+# Sigmoid activation function for output layer
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
 
-def forward_pass(x, weights1, bias1, weights2, bias2):
-    # First layer
-    z1 = np.dot(weights1, x) + bias1
-    a1 = relu(z1)
+# Binary cross entropy for loss calculation
+def binary_cross_entropy(pred, target):
+    return -(target * np.log(pred + 1e-8) + (1 - target) * np.log(1 - pred + 1e-8))
 
-    # Second layer
-    z2 = np.dot(weights2, a1) + bias2
-    a2 = relu(z2)
-
-    return a2  # Output of the final layer (predicted value)
-
-def softmax(x):
-    e_x = np.exp(x - np.max(x))  # stability fix
-    return e_x / np.sum(e_x)
-
-# Input (4 features)
-x = np.array([0.2, 0.4, 0.6, 0.8])
-
-# Layer 1: 3 neurons
-weights1 = np.array([
-    [0.5, -0.6, 0.2, 0.1],
-    [-0.3, 0.8, -0.5, 0.4],
-    [0.2, 0.1, 0.9, -0.7]
+# Example input (4 features: like simplified pixels)
+X = np.array([
+    [0, 1, 0, 1],   # cat-like
+    [1, 0, 1, 0],   # not-cat
+    [0.5, 1, 0.5, 1],  # cat-like
+    [1, 0.2, 1, 0.1]   # not-cat
 ])
-bias1 = np.array([0.1, 0.2, 0.0])
 
-# Layer 2: 2 neurons (e.g. cat vs not-cat)
-weights2 = np.array([
-    [0.3, -0.2, 0.5],
-    [-0.6, 0.1, 0.4]
-])
-bias2 = np.array([0.05, -0.1])
+# Labels: 1 = cat, 0 = not-cat
+Y = np.array([1, 0, 1, 0])
 
-# Forward pass
-output = forward_pass(x, weights1, bias1, weights2, bias2)
+# Seed for reproducibility
+np.random.seed(42)
 
-probs = softmax(output)
-print("Probabilities:", probs)
+# One-layer model: 1 neuron for binary classification
+input_size = 4
+weights = np.random.randn(input_size)
+bias = 0.0
+
+# training
+
+# Learning rate
+
+lr = 0.1
+
+# Training loop
+for epoch in range(1000):
+    total_loss = 0
+
+    for x,y in zip(X,Y):
+        # Forward pass
+        z = np.dot(weights, x) + bias
+        pred = sigmoid(z)
+
+        # Loss
+        loss = binary_cross_entropy(pred, y)
+        total_loss += loss
+
+        # Backward pass (manual gradient)
+        dL_dpred = -(y / (pred + 1e-8)) + ((1 - y) / (1 - pred + 1e-8))
+        dpred_dz = pred * (1 - pred) # derivative of sigmoid
+        dz_dw = x
+
+        grad = dL_dpred * dpred_dz
+
+        # Update weights and bias
+        weights -= lr * grad * dz_dw
+        bias -= lr * grad
+
+    
+    # Print every 100 epochs
+    if epoch % 100 == 0:
+        print(f"Epoch {epoch}, Loss: {total_loss:.4f}")
+
+
+print("\nTrained weights:", weights)
+print("Trained bias:", bias)
+
+for x, y in zip(X, Y):
+    pred = sigmoid(np.dot(weights, x) + bias)
+    label = 1 if pred > 0.5 else 0
+    print(f"Input: {x}, Predicted: {pred:.3f} → Label: {label} (True: {y})")
